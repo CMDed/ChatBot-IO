@@ -6,10 +6,9 @@ from unidecode import unidecode
 
 # No ejecuta nada por sí misma, solo "describe" qué se debe hacer.
 class IOAction:
-    def __init__(self, kind, value=None):
-        self.kind = kind  # Tipo de acción: "Input" o "Output"
-        self.value = value  # Contenido de la acción
-
+    def __init__(self, tipo, valor=None):
+        self.tipo = tipo
+        self.valor = valor
 
 # No imprime, no lee ni modifica nada externo, es completamente pura.
 def process_message(message):
@@ -19,12 +18,15 @@ def process_message(message):
 
     responses = {
         "funcion pura": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
+        "funciones puras": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
         "monada": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
+        "monadas": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
         "io": "En programación funcional, IO representa operaciones de entrada/salida que se controlan de forma segura.",
+        "efecto secundario": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo.",
         "efectos secundarios": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo."
     }
 
-    key = next((k for k in responses if k in message), None)
+    key = next((k for k in responses if re.search(rf'\b{k}\b', message)), None)
 
     if key:
         return IOAction("Output", responses[key])
@@ -44,18 +46,15 @@ def main():
     print("Bienvenido a Mentor Funcional. Escribe 'salir' para terminar.\n")
 
     while True:
-        # Leer mensaje del usuario (efecto controlado)
+
         message = interpret(IOAction("Input"))
 
-        # Condición de salida
         if message.lower() == "salir":
             print("Hasta luego.")
             break
 
-        # Procesar el mensaje (parte pura)
         action = process_message(message)
 
-        # Ejecutar la acción (efecto controlado)
         interpret(action)
 
 
