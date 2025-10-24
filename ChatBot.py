@@ -1,20 +1,30 @@
 import re
 from unidecode import unidecode
-# ------------------------------------------
-# Chatbot Educativo: Mentor Funcional
-# ------------------------------------------
+from functools import reduce
 
 # No ejecuta nada por sí misma, solo "describe" qué se debe hacer.
 class IOAction:
-    def __init__(self, tipo, valor=None):
-        self.tipo = tipo
-        self.valor = valor
+    def __init__(self, kind, value=None):
+        self.kind = kind
+        self.value = value
 
 # No imprime, no lee ni modifica nada externo, es completamente pura.
 def process_message(message):
-
     message = unidecode(message.lower())
     message = re.sub(r'[^\w\s]', '', message)
+    
+    #pipeline funcional
+    words = message.split()
+    stopwords = ["que", "es", "son", "los", "las", "un", "una", "de", "en", "y"]
+    
+    #normalizar palabras
+    words = list(map(lambda w: w.strip(), words))
+    
+    #eliminar stopwords
+    words = list(filter(lambda w: w not in stopwords, words))
+    
+    #reconstruir texto procesado
+    message = reduce(lambda acc, w: acc + " " + w, words, "").strip()
 
     responses = {
         "funcion pura": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
@@ -27,7 +37,6 @@ def process_message(message):
     }
 
     key = next((k for k in responses if re.search(rf'\b{k}\b', message)), None)
-
     if key:
         return IOAction("Output", responses[key])
     else:
