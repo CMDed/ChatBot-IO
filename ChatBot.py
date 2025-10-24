@@ -10,15 +10,31 @@ class IOAction:
 
 # No imprime, no lee ni modifica nada externo, es completamente pura.
 def process_message(message):
+    # Normalización básica
     message = unidecode(message.lower())
     message = re.sub(r'[^\w\s]', '', message)
     
     #pipeline funcional
     words = message.split()
-    stopwords = ["que", "es", "son", "los", "las", "un", "una", "de", "en", "y"]
+    stopwords = ["que", "es", "son", "los", "las", "un", "una", "de", "en", "y", "sobre", "acerca"]
     
+    #sinónimo
+    synonyms = {
+        "funciones": "funcion",
+        "puras": "pura",
+        "puro": "pura",
+        "monadas": "monada",
+        "monad": "monada",
+        "io": "io",
+        "entrada": "io",
+        "salida": "io",
+        "efectos": "efecto",
+        "secundarios": "secundario",
+        "colaterales": "secundario"
+    }
+
     #normalizar palabras
-    words = list(map(lambda w: w.strip(), words))
+    words = list(map(lambda w: synonyms[w] if w in synonyms else w, words))
     
     #eliminar stopwords
     words = list(filter(lambda w: w not in stopwords, words))
@@ -28,12 +44,9 @@ def process_message(message):
 
     responses = {
         "funcion pura": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
-        "funciones puras": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
         "monada": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
-        "monadas": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
         "io": "En programación funcional, IO representa operaciones de entrada/salida que se controlan de forma segura.",
-        "efecto secundario": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo.",
-        "efectos secundarios": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo."
+        "efecto secundario": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo."
     }
 
     key = next((k for k in responses if re.search(rf'\b{k}\b', message)), None)
