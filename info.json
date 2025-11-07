@@ -1,0 +1,31 @@
+{
+  "respuestas": {
+    "saludo": "Hola, soy tu mentor del curso de Lenguajes de Programación. Puedo explicarte sobre los conceptos que abarca la programación funcional, ¿alguna pregunta?",
+
+    "funcion pura": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
+    "monada": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
+    "io": "En programación funcional, IO representa operaciones de entrada/salida que se controlan de forma segura.",
+    "efecto secundario": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo.",
+    "fallback": "Reformula la respuesta, puedo explicarte sobre funciones puras, mónadas, IO o efectos secundarios.",
+    "programacion funcional": "La programación funcional es un paradigma de programación que trata la computación como la evaluación de funciones matemáticas y evita los efectos secundarios y el cambio de estado (mutabilidad)"
+  },
+  "reglas": [
+    ["\\bfuncion pura\\b", "funcion pura"],
+    ["\\bmonada\\b", "monada"],
+    ["\\bio\\b", "io"],
+    ["\\befecto secundario\\b", "efecto secundario"],
+    ["\\b(hola|saludo)\\b", "saludo"],
+    ["\\bprogramacion funcional\\b", "programacion funcional"]
+  ],
+  "sinonimos": {
+    "funcion": ["funciones", "funcionalidad", "funcionamiento"],
+    "pura": ["puras", "puro"],
+    "monada": ["monadas", "monad"],
+    "io": ["entrada", "salida"],
+    "efecto": ["efectos"],
+    "secundario": ["secundarios", "colaterales"],
+    "saludo": ["saludos"],
+    "programacion": ["programacion", "progra"],
+    "funcional": ["funcionales", "funcio"]
+  }
+}
