@@ -2,13 +2,36 @@ import re
 from unidecode import unidecode
 from functools import reduce
 
-# No ejecuta nada por sí misma, solo "describe" qué se debe hacer.
+#No ejecuta nada por sí misma, solo "describe" qué se debe hacer
 class IOAction:
     def __init__(self, kind, value=None):
         self.kind = kind
         self.value = value
 
-# No imprime, no lee ni modifica nada externo, es completamente pura.
+def get_respuesta(topic):
+    if topic == "funcion pura":
+        return "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios."
+    elif topic == "monada":
+        return "Una mónada es una estructura que permite encadenar operaciones con efectos controlados."
+    elif topic == "io":
+        return "En programación funcional, IO representa operaciones de entrada/salida que se controlan de forma segura."
+    elif topic == "efecto secundario":
+        return "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo."
+    elif topic == "saludo":
+        return "Hola, soy tu mentor del curso de Lenguajes de Programación. Puedo explicarte sobre programación funcional, ¿alguna pregunta?"
+    else:
+        return "Puedo explicarte sobre funciones puras, mónadas, IO o efectos secundarios."
+    
+#tuplas
+reglas=[
+    (r'\bfuncion pura\b', "funcion pura"),
+    (r'\bmonada\b', "monada"),
+    (r'\bio\b', "io"),
+    (r'\befecto secundario\b', "efecto secundario"),
+    (r'\b(hola|saludo)\b', "saludo"),
+]
+
+#No imprime, no lee ni modifica nada externo, es completamente pura
 def process_message(message):
     # Normalización básica
     message = unidecode(message.lower())
@@ -30,7 +53,8 @@ def process_message(message):
         "salida": "io",
         "efectos": "efecto",
         "secundarios": "secundario",
-        "colaterales": "secundario"
+        "colaterales": "secundario",
+        "saludos": "saludo"
     }
 
     #normalizar palabras
@@ -42,20 +66,18 @@ def process_message(message):
     #reconstruir texto procesado
     message = reduce(lambda acc, w: acc + " " + w, words, "").strip()
 
-    responses = {
-        "funcion pura": "Una función pura siempre devuelve el mismo resultado si los argumentos son iguales y no causa efectos secundarios.",
-        "monada": "Una mónada es una estructura que permite encadenar operaciones con efectos controlados.",
-        "io": "En programación funcional, IO representa operaciones de entrada/salida que se controlan de forma segura.",
-        "efecto secundario": "Un efecto secundario ocurre cuando una función modifica algo fuera de su ámbito o depende del estado externo."
-    }
+    coincidencia = next(
+        (topic for pattern, topic in reglas if re.search(pattern, message)),
+        None
+    )
 
-    key = next((k for k in responses if re.search(rf'\b{k}\b', message)), None)
-    if key:
-        return IOAction("Output", responses[key])
+    if coincidencia:
+        response_text = get_respuesta(coincidencia)
     else:
-        return IOAction("Output", "Puedo explicarte sobre funciones puras, mónadas, IO o efectos secundarios.")
+        response_text = "Reformula la respuesta, puedo explicarte sobre funciones puras, mónadas, IO o efectos secundarios."
+    return IOAction("Output", response_text)
 
-# Intérprete: ejecuta las acciones descritas (aquí sí hay efectos secundarios controlados)
+#intérprete
 def interpret(action):
     if action.kind == "Output":
         print(f"Mentor Funcional: {action.value}")
@@ -63,7 +85,7 @@ def interpret(action):
         return input("Tú: ")
 
 
-# Programa principal:conecta las piezas sin mezclar la lógica pura con los efectos
+#main
 def main():
     print("Bienvenido a Mentor Funcional. Escribe 'salir' para terminar.\n")
 
@@ -80,6 +102,6 @@ def main():
         interpret(action)
 
 
-# Punto de entrada del programa
+#punto de entrada
 if __name__ == "__main__":
     main()
