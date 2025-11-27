@@ -1,0 +1,10 @@
+# Directorios de compilación/caché
+__pycache__/
+*.pyc
+
+# Caché de pytest
+.pytest_cache/
+
+# Entornos virtuales
+venv/
+.venv/
