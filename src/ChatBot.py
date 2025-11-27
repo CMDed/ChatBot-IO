@@ -23,8 +23,19 @@ def main():
         if message.lower() == "salir":
             print("Hasta luego.")
             break
+            
+        if message.strip().lower() == "comandos":
+            interpret(IOAction("Output",
+                "Comandos disponibles:\n"
+                "- comandos: lista todos los comandos\n"
+                "- estadisticas: muestra análisis del uso del bot\n"
+                "- agregar sinonimo X = Y: añade un nuevo sinónimo\n"
+                "- modo basico / modo avanzado: cambia nivel de detalle\n"
+                "- salir: termina el programa\n"
+            ))
+            continue
 
-        #comando para estadistica
+        # comando para estadistica
         if message.strip().lower() in ["estadisticas", "estadísticas", "stats"]:
             res = compute_stats_and_plot()
             if res["plot"]:
@@ -36,10 +47,10 @@ def main():
 
         coincidencia, response_text = process_message(message, reglas, respuestas, sinonimos_inversos)
 
-        #registro de intecion
+        # registro de intecion
         interpret(IOAction("LogIntent", coincidencia))
 
-        #registro de respuesta
+        # registro de respuesta
         interpret(IOAction("Output", response_text))
 
 if __name__ == "__main__":
