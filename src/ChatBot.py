@@ -2,9 +2,10 @@ from data_loader import load_info
 from core import process_message
 from io_actions import IOAction, interpret
 from analytics import compute_stats_and_plot
+import json
 
 def main():
-    print("Bienvenido a MentorCORE. Escribe 'salir' para terminar.\n")
+    print("Bienvenido a MentorCORE. Escribe 'salir' para terminar. Escribe 'comandos' para listar todos los comandos disponibles.\n")
 
     try:
         respuestas, reglas, sinonimos_inversos = load_info('info.json')
@@ -15,6 +16,10 @@ def main():
         print(f"Error al cargar info.json: {e}")
         return
 
+    from data_loader import create_inverse_synonyms
+
+    modo = "basico"  #basico y avanzado
+
     while True:
         message = interpret(IOAction("Input"))
         if message is None:
@@ -23,19 +28,63 @@ def main():
         if message.lower() == "salir":
             print("Hasta luego.")
             break
-            
+
+        if message == "modo basico":
+            modo = "basico"
+            interpret(IOAction("Output", "Modo básico activado."))
+            continue
+        
+        if message == "modo avanzado":
+            modo = "avanzado"
+            interpret(IOAction("Output", "Modo avanzado activado."))
+            continue
+
         if message.strip().lower() == "comandos":
             interpret(IOAction("Output",
                 "Comandos disponibles:\n"
-                "- comandos: lista todos los comandos\n"
                 "- estadisticas: muestra análisis del uso del bot\n"
-                "- agregar sinonimo X = Y: añade un nuevo sinónimo\n"
+                "- estadisticas hora: muestra análisis del uso del bot por horas\n"
+                "- agregar sinonimo X = Y: añade un nuevo sinónimo (Y es la base, X es el sinónimo)\n"
                 "- modo basico / modo avanzado: cambia nivel de detalle\n"
                 "- salir: termina el programa\n"
             ))
             continue
 
-        # comando para estadistica
+        if message.startswith("agregar sinonimo"):
+            try:
+                _, resto = message.split("agregar sinonimo", 1)
+                resto = resto.strip()
+                
+                base, nuevo = map(lambda x: x.strip(), resto.split("=", 1))
+                
+                sinonimo_ingresado = base
+                palabra_base = nuevo
+
+                with open("info.json", "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+                if palabra_base in data["sinonimos"]:
+                    if sinonimo_ingresado not in data["sinonimos"][palabra_base]:
+                        data["sinonimos"][palabra_base].append(sinonimo_ingresado)
+                    else:
+                        interpret(IOAction("Output", f"El sinónimo '{sinonimo_ingresado}' ya existe para la base '{palabra_base}'."))
+                        continue
+                else:
+                    data["sinonimos"][palabra_base] = [sinonimo_ingresado]
+
+                with open("info.json", "w", encoding="utf-8") as f:
+                    json.dump(data, f, indent=4, ensure_ascii=False)
+
+                sinonimos_inversos = create_inverse_synonyms(data["sinonimos"])
+
+                interpret(IOAction("Output", f"Sinónimo agregado con éxito: '{sinonimo_ingresado}' ahora se mapea a la base '{palabra_base}'."))
+            except ValueError:
+                interpret(IOAction("Output", "Error de formato. Usa: agregar sinonimo SINÓNIMO = BASE"))
+            except Exception as e:
+                interpret(IOAction("Output", f"Error inesperado al agregar sinónimo: {e}"))
+
+            continue
+
         if message.strip().lower() in ["estadisticas", "estadísticas", "stats"]:
             res = compute_stats_and_plot()
             if res["plot"]:
@@ -45,11 +94,24 @@ def main():
                 interpret(IOAction("Output", res["message"]))
             continue
 
+        if message == "estadisticas hora":
+            from analytics import plot_by_hour
+            path = plot_by_hour()
+            if path:
+                interpret(IOAction("Output", f"Gráfico creado: {path}"))
+            else:
+                interpret(IOAction("Output", "No hay datos suficientes"))
+            continue
+
+        # Procesamiento normal del mensaje
         coincidencia, response_text = process_message(message, reglas, respuestas, sinonimos_inversos)
 
         # registro de intecion
         interpret(IOAction("LogIntent", coincidencia))
 
+        if modo == "avanzado":
+            response_text += "\n\n[Explicación avanzada disponible bajo petición]"
+        
         # registro de respuesta
         interpret(IOAction("Output", response_text))
 
