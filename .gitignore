@@ -1,10 +1,14 @@
-# Directorios de compilación/caché
+#directorios de compilación/caché
 __pycache__/
 *.pyc
 
-# Caché de pytest
+#caché de pytest
 .pytest_cache/
 
-# Entornos virtuales
+#entornos virtuales
 venv/
 .venv/
+
+#otros archivos
+*.png
+analytics.csv
