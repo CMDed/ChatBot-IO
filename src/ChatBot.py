@@ -1,8 +1,26 @@
+from datetime import datetime
+import os
 from data_loader import load_info
 from core import process_message
 from io_actions import IOAction, interpret
 from analytics import compute_stats_and_plot
 import json
+
+def registrar_estadistica(tema, ruta="stats.json"):
+    if not os.path.exists(ruta):
+        with open(ruta, "w", encoding="utf-8") as f:
+            json.dump({"registros": []}, f, indent=2)
+
+    with open(ruta, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    data["registros"].append({
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "tema": tema
+    })
+
+    with open(ruta, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 def main():
     print("Bienvenido a MentorCORE. Escribe 'salir' para terminar. Escribe 'comandos' para listar todos los comandos disponibles.\n")
@@ -105,6 +123,8 @@ def main():
 
         # Procesamiento normal del mensaje
         coincidencia, response_text = process_message(message, reglas, respuestas, sinonimos_inversos)
+
+        registrar_estadistica(coincidencia if coincidencia else "fallback")
 
         # registro de intecion
         interpret(IOAction("LogIntent", coincidencia))
