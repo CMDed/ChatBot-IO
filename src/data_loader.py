@@ -17,10 +17,15 @@ def load_info(path='info.json'):
         respuestas = datos['respuestas']
         reglas = datos['reglas']
         sinonimos_inversos = create_inverse_synonyms(datos.get('sinonimos', {}))
-        return respuestas, reglas, sinonimos_inversos
+        respuestas_avanzadas = datos.get("respuestas_avanzadas", {})
+        return respuestas, reglas, sinonimos_inversos, respuestas_avanzadas
     except FileNotFoundError:
         raise
     except json.JSONDecodeError:
         raise
     except KeyError as e:
         raise
+
+def save_info(data, path='info.json'):
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)

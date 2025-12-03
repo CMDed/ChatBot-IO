@@ -12,3 +12,7 @@ venv/
 #otros archivos
 *.png
 analytics.csv
+
+users.json
+session.json
+conversations

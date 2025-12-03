@@ -26,7 +26,7 @@ def main():
     print("Bienvenido a MentorCORE. Escribe 'salir' para terminar. Escribe 'comandos' para listar todos los comandos disponibles.\n")
 
     try:
-        respuestas, reglas, sinonimos_inversos = load_info('info.json')
+        respuestas, reglas, sinonimos_inversos, respuestas_avanzadas = load_info('info.json')
 
         with open('info.json', 'r', encoding='utf-8') as f:
             data_info = json.load(f)

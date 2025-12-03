@@ -1,3 +1,28 @@
 {
-  "registros": []
+  "registros": [
+    {
+      "timestamp": "2025-12-03 18:36:31",
+      "tema": "saludo"
+    },
+    {
+      "timestamp": "2025-12-03 18:36:33",
+      "tema": "io"
+    },
+    {
+      "timestamp": "2025-12-03 18:36:39",
+      "tema": "io"
+    },
+    {
+      "timestamp": "2025-12-03 18:36:45",
+      "tema": "efecto secundario"
+    },
+    {
+      "timestamp": "2025-12-03 18:36:51",
+      "tema": "efecto secundario"
+    },
+    {
+      "timestamp": "2025-12-03 18:36:55",
+      "tema": "fallback"
+    }
+  ]
 }
