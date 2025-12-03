@@ -27,9 +27,15 @@ def main():
 
     try:
         respuestas, reglas, sinonimos_inversos = load_info('info.json')
+
+        with open('info.json', 'r', encoding='utf-8') as f:
+            data_info = json.load(f)
+        respuestas_avanzadas = data_info.get('respuestas_avanzadas', {})
+
     except FileNotFoundError:
         print("Error: No se encontró 'info.json'. Deteniendo programa.")
         return
+    
     except Exception as e:
         print(f"Error al cargar info.json: {e}")
         return
@@ -130,7 +136,13 @@ def main():
         interpret(IOAction("LogIntent", coincidencia))
 
         if modo == "avanzado":
-            response_text += "\n\n[Explicación avanzada disponible bajo petición]"
+    
+            # Si existe explicacion avanzada, usarla
+            if coincidencia in respuestas_avanzadas:
+                response_text = respuestas_avanzadas[coincidencia]
+            else:
+                # Si no hay contenido avanzado para este tema
+                response_text += "\n\n[Puedo darte una explicación más profunda si lo deseas]"
         
         # registro de respuesta
         interpret(IOAction("Output", response_text))
