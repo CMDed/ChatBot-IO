@@ -137,11 +137,9 @@ def main():
 
         if modo == "avanzado":
     
-            # Si existe explicacion avanzada, usarla
             if coincidencia in respuestas_avanzadas:
                 response_text = respuestas_avanzadas[coincidencia]
             else:
-                # Si no hay contenido avanzado para este tema
                 response_text += "\n\n[Puedo darte una explicación más profunda si lo deseas]"
         
         # registro de respuesta

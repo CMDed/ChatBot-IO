@@ -34,7 +34,6 @@ def login(username: str, password: str) -> bool:
     h = hash_password(password)
     for u in data["usuarios"]:
         if u["username"] == username and u["password_hash"] == h:
-            # create session
             with open(SESSION_FILE, "w", encoding="utf-8") as s:
                 json.dump({"current_user": username}, s, indent=2)
             return True

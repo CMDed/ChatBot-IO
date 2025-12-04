@@ -16,10 +16,8 @@ class App:
         self.root.title("MentorCORE - GUI")
         self.root.geometry("800x600")
         self.user = current_user()
-        # CAMBIO 1.2: Cargar respuestas avanzadas
         self.respuestas, self.reglas, self.sinonimos, self.respuestas_avanzadas = load_info(INFO_PATH)
         self.modo = "basico"
-        # La línea self.respuestas_avanzadas = {} original en el código del usuario se ha eliminado
         self.build_login_screen()
     
     def _append_user(self, text: str):
@@ -86,7 +84,6 @@ class App:
         men.add_command(label="Cerrar sesión", command=self.do_logout)
         self.root.config(menu=men)
 
-        # store references
         self.txt_widget = txt
         self.entry_widget = entry
 
@@ -100,12 +97,9 @@ class App:
         if not msg:
             return
         entry.delete(0, tk.END)
-        # mostrar usuario
         txt_widget.config(state=tk.NORMAL)
         txt_widget.insert(tk.END, f"Tú: {msg}\n")
         txt_widget.config(state=tk.DISABLED)
-
-        # --- CAMBIO 1.3: Procesamiento con comandos y modo avanzado ---
 
         msg_lower = msg.lower().strip()
         if msg_lower == "comandos":
@@ -120,7 +114,6 @@ class App:
             )
             self._append_bot(comandos_text)
             return
-        # cambiar modo
         if msg_lower == "modo avanzado":
             self.modo = "avanzado"
             self._append_bot("Modo avanzado activado.\n")
@@ -129,20 +122,16 @@ class App:
             self.modo = "basico"
             self._append_bot("Modo básico activado.\n")
             return
-        # agregar sinonimo
         if msg_lower.startswith("agregar sinonimo"):
             try:
-                # ejemplo: agregar sinonimo prof = profesor
                 _, data = msg_lower.split("agregar sinonimo", 1)
                 x, y = map(str.strip, data.split("="))
 
                 self.sinonimos[x] = y
 
-                # guardar en info.json
                 with open(INFO_PATH, "r", encoding="utf-8") as f:
                     data_json = json.load(f)
                 data_json.setdefault("sinonimos", {}).setdefault(y, [])
-                # Solo añade el sinónimo si no existe ya para evitar duplicados en el archivo JSON
                 if x not in data_json["sinonimos"][y]:
                     data_json["sinonimos"][y].append(x)
                 
@@ -153,10 +142,8 @@ class App:
             except:
                 self._append_bot("Formato incorrecto. Usa: agregar sinonimo X = Y\n")
             return
-        # estadísticas normales
         if msg_lower == "estadisticas":
             import analysis
-            # Se añade un try/except simple en caso de que 'analysis' no pueda importarse
             try:
                 df, temas, horas = analysis.analisis_completo()
                 analysis.grafico_temas(temas)
@@ -164,7 +151,6 @@ class App:
             except ImportError:
                 self._append_bot("Error: La librería 'analysis' no está disponible o incompleta.\n")
             return
-        # estadísticas por hora
         if msg_lower == "estadisticas hora":
             import analysis
             try:
@@ -174,42 +160,33 @@ class App:
             except ImportError:
                 self._append_bot("Error: La librería 'analysis' no está disponible o incompleta.\n")
             return
-        # --- procesamiento normal del mensaje ---
         coincidence, response = process_message(msg, self.reglas, self.respuestas, self.sinonimos)
 
-        # modo avanzado
         if self.modo == "avanzado" and coincidence in self.respuestas_avanzadas:
             response = self.respuestas_avanzadas[coincidence]
 
-        # guardar conversacion
         user = current_user() or "anon"
         os.makedirs(CONV_DIR, exist_ok=True)
         conv_path = os.path.join(CONV_DIR, f"{user}.json")
         append_to_json_list(conv_path, "turnos", {"timestamp": datetime.now().isoformat(), "input": msg, "intent": coincidence, "response": response})
 
-        # estadística
-        # Se añade un try/except simple en caso de que 'ChatBot' no pueda importarse
         try:
             from ChatBot import registrar_estadistica
             registrar_estadistica(coincidence if coincidence else "fallback")
         except ImportError:
-            # Si no se puede importar la función, simplemente se ignora y continúa
             pass
         
         self._append_bot(response + "\n")
 
     def open_stats(self):
-        # abrir analysis.py o mostrar mini resúmen
         import analysis
         df, temas, horas = analysis.analisis_completo()
-        # mostrar en ventana simple
         win = tk.Toplevel(self.root)
         win.title("Estadísticas")
         lbl = tk.Label(win, text=str(temas.to_dict()))
         lbl.pack()
 
     def open_admin(self):
-        # ventana para agregar reglas/respuestas/sinonimos
         win = tk.Toplevel(self.root)
         win.title("Admin - Añadir contenido")
         tk.Label(win, text="Trigger (regex)").pack()
@@ -226,20 +203,16 @@ class App:
             k = key.get().strip()
             b = basic.get().strip()
             a = adv.get().strip()
-            # Validaciones mínimas
             if not trg or not k or not b:
                 messagebox.showerror("Error", "Trigger, Clave y Respuesta básica son obligatorios.")
                 return
 
-            # cargar info.json
             with open(INFO_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            # agregar regla y respuestas
             data.setdefault("reglas", []).append([trg, k])
             data.setdefault("respuestas", {})[k] = b
             if a:
                 data.setdefault("respuestas_avanzadas", {})[k] = a
-            # guardar
             with open(INFO_PATH, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4, ensure_ascii=False)
             messagebox.showinfo("OK","Regla agregada. Reinicia la app para recargar reglas.")
